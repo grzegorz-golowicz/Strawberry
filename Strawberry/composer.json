@@ -1,0 +1,13 @@
+{
+    "minimum-stability": "stable",
+    "authors": [
+        {
+            "name": "Grzegorz Golowicz",
+            "email": "grzegorz.golowicz@idwt.pl"
+        }
+    ],
+    "require": {
+        "videlalvaro/php-amqplib": "v2.1.0",
+        "predis/predis": "v0.8.4"
+    }
+}
