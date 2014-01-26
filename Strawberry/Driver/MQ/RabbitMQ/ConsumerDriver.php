@@ -1,10 +1,10 @@
 <?php
-namespace Strawberry\Driver\MQ;
+namespace Strawberry\Driver\MQ\RabbitMQ;
 
 use PhpAmqpLib\Connection\AMQPConnection;
 use Strawberry\Driver\MQ\RabbitMQ\MessageTranslator;
 
-class RabbitMQConsumerDriver extends \Strawberry\Driver\MQ\AbstractConsumerDriver
+class ConsumerDriver extends \Strawberry\Driver\MQ\AbstractConsumerDriver
 {
     /** @var AMQPConnection */
     protected $connection = null;
@@ -32,15 +32,18 @@ class RabbitMQConsumerDriver extends \Strawberry\Driver\MQ\AbstractConsumerDrive
 
     protected function runWorker()
     {
-        $this->getChannel()->queue_declare('simple_queue', false, true, false, false);
+        $this->getChannel()->queue_declare('simple_queue', false, true, false, false); //FIXME Use Configuration
 
         $callback = function (\PhpAmqpLib\Message\AMQPMessage $msg) {
-            $this->getWorkerInstance()->processMessage($this->translateMessage($msg)); //FIXME pass translated msg in params
+            $this->getLogger()->debug('Running processMessage for: ' . $msg->delivery_info['delivery_tag']);
+            $this->getWorkerInstance()->processMessage($this->translateMessage($msg));
 
             if ($this->getWorkerInstance()->isLastJobSuccessful()) {
                 $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+                $this->getLogger()->debug('Sending ACK for message: ' . $msg->delivery_info['delivery_tag']);
             } else {
                 $msg->delivery_info['channel']->basic_cancel($msg->delivery_info['delivery_tag']);
+                $this->getLogger()->warning('Canceling message: ' . $msg->delivery_info['delivery_tag']);
             }
         };
 

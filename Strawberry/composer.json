@@ -8,6 +8,8 @@
     ],
     "require": {
         "videlalvaro/php-amqplib": "v2.1.0",
-        "predis/predis": "v0.8.4"
+        "predis/predis": "v0.8.4",
+        "monolog/monolog": "v1.7.0",
+        "pimple/pimple": "v1.1.0"
     }
 }

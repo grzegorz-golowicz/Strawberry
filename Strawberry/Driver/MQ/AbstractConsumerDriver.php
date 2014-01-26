@@ -2,17 +2,44 @@
 namespace Strawberry\Driver\MQ;
 
 use PhpAmqpLib\Message\AMQPMessage;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerInterface;
+use Strawberry\Exception\NullWorkerException;
 
-abstract class AbstractConsumerDriver
+abstract class AbstractConsumerDriver implements LoggerAwareInterface
 { //FIXME LoggerAwareInterface
 
     /** @var WorkerInterface */
     protected $workerInstance = null;
 
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
+     * Sets a logger instance on the object
+     *
+     * @param LoggerInterface $logger
+     * @return null
+     */
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
+    /**
+     * @return LoggerInterface
+     */
+    protected function getLogger()
+    {
+        return $this->logger;
+    }
+
     abstract protected function runWorker();
 
     /**
-     * @return WorkerInterface
+     * @return AbstractWorker
      */
     protected function getWorkerInstance()
     {
@@ -24,6 +51,8 @@ abstract class AbstractConsumerDriver
      */
     public function setWorkerInstance(WorkerInterface $workerInstance)
     {
+        $this->getLogger()->debug('Setting worker (' . get_class($this->getWorkerInstance()) . ').');
+
         $this->workerInstance = $workerInstance;
     }
 
@@ -36,8 +65,11 @@ abstract class AbstractConsumerDriver
     public function run()
     {
         if (null === $this->getWorkerInstance()) {
-            throw new \Exception('Cannot run consumer without Worker instance.'); //FIXME change to specific exception
+            $this->getLogger()->critical('Trying to run consumer without Worker instance.');
+            throw new NullWorkerException('Cannot run consumer without Worker instance.');
         }
+
+        $this->getLogger()->debug('Running worker (' . get_class($this->getWorkerInstance()) . ').');
 
         $this->runWorker();
     }
