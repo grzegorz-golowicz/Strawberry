@@ -37,4 +37,10 @@ abstract class AbstractWorker implements LoggerAwareInterface
      * @return bool
      */
     public abstract function isLastJobSuccessful();
+
+    /**
+     * Worker name ex.: DownloadWorker
+     * @return string
+     */
+    public abstract function getName();
 } 

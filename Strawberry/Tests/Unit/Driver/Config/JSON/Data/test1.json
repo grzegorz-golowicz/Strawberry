@@ -1,0 +1,12 @@
+{"prefix1": {
+    "MQ": {
+        "prop1": "strProperty",
+        "prop2": 10
+    },
+    "WORKERS": {
+        "test": {
+            "prop1": "strProperty2",
+            "prop2": 20
+        }
+    }
+}}

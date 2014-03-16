@@ -6,9 +6,13 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Strawberry\Exception\NullWorkerException;
 
+/**
+ * Class AbstractConsumerDriver
+ * Base class for all PHP Workers
+ * @package Strawberry\Driver\MQ
+ */
 abstract class AbstractConsumerDriver implements LoggerAwareInterface
-{ //FIXME LoggerAwareInterface
-
+{
     /** @var WorkerInterface */
     protected $workerInstance = null;
 
@@ -47,13 +51,13 @@ abstract class AbstractConsumerDriver implements LoggerAwareInterface
     }
 
     /**
-     * @param WorkerInterface $workerInstance
+     * @param AbstractWorker $worker
      */
-    public function setWorkerInstance(WorkerInterface $workerInstance)
+    public function setWorkerInstance(AbstractWorker $worker)
     {
-        $this->getLogger()->debug('Setting worker (' . get_class($this->getWorkerInstance()) . ').');
+        $this->getLogger()->debug('Setting worker (' . get_class($worker) . ').');
 
-        $this->workerInstance = $workerInstance;
+        $this->workerInstance = $worker;
     }
 
     /**

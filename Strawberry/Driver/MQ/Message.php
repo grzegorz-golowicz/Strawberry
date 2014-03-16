@@ -1,6 +1,6 @@
 <?php
 /**
- * MQ messageą universal class.
+ * MQ message universal class.
  */
 namespace Strawberry\Driver\MQ;
 

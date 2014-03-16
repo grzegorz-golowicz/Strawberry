@@ -2,9 +2,10 @@
 namespace Strawberry\Driver\MQ\RabbitMQ;
 
 use PhpAmqpLib\Connection\AMQPConnection;
+use Strawberry\Driver\MQ\AbstractConsumerDriver;
 use Strawberry\Driver\MQ\RabbitMQ\MessageTranslator;
 
-class ConsumerDriver extends \Strawberry\Driver\MQ\AbstractConsumerDriver
+class ConsumerDriver extends AbstractConsumerDriver
 {
     /** @var AMQPConnection */
     protected $connection = null;
