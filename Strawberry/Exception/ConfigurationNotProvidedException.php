@@ -1,5 +1,5 @@
 <?php
-namespace Strawberry\Driver\Config;
+namespace Strawberry\Exception;
 
 class ConfigurationNotProvidedException extends \LogicException
 {
