@@ -2,7 +2,7 @@
 namespace Strawberry\Driver\Config\JSON;
 
 
-use Strawberry\Driver\Config\ConfigurationNotProvidedException;
+use Strawberry\Exception\ConfigurationNotProvidedException;
 use Strawberry\Driver\Config\AbstractConfigProvider;
 use Strawberry\Driver\Config\ConfigEntity;
 

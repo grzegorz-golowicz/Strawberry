@@ -28,7 +28,7 @@ class ConfigProviderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException Strawberry\Driver\Config\ConfigurationNotProvidedException
+     * @expectedException Strawberry\Exception\ConfigurationNotProvidedException
      */
     public function testNotExistingWorkerConfig()
     {
