@@ -3,10 +3,32 @@ namespace Strawberry\Driver\MQ;
 
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
+use Strawberry\Driver\Config\ConfigEntity;
 
 abstract class AbstractWorker implements LoggerAwareInterface
 {
+    /** @var  LoggerInterface */
     private $logger;
+
+    /** @var  ConfigEntity */
+    private $config;
+
+    /**
+     * @param \Strawberry\Driver\Config\ConfigEntity $config
+     */
+    public function setConfig(ConfigEntity $config)
+    {
+        $this->config = $config;
+    }
+
+    /**
+     * @return \Strawberry\Driver\Config\ConfigEntity
+     */
+    public function getConfig()
+    {
+        return $this->config;
+    }
+
 
     /**
      * Sets a logger instance on the object

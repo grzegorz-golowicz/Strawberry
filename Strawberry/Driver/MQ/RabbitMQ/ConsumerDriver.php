@@ -2,13 +2,15 @@
 namespace Strawberry\Driver\MQ\RabbitMQ;
 
 use PhpAmqpLib\Connection\AMQPConnection;
+use Strawberry\Driver\Config\AbstractConfigProvider;
+use Strawberry\Driver\Config\ConfigEntity;
 use Strawberry\Driver\MQ\AbstractConsumerDriver;
 use Strawberry\Driver\MQ\RabbitMQ\MessageTranslator;
 
 class ConsumerDriver extends AbstractConsumerDriver
 {
     /** @var AMQPConnection */
-    protected $connection = null;
+    private $connection = null;
 
     /**
      * @param bool $forceNew set true if you want new connection instead of reusing.
@@ -16,8 +18,9 @@ class ConsumerDriver extends AbstractConsumerDriver
      */
     protected function getConnection($forceNew = false)
     {
+        $connectionConfig = $this->getConfigProvider()->getMQConfig()->getNode('connection');
         if (true === $forceNew || null === $this->connection) {
-            $this->connection = new AMQPConnection('localhost', 5672, 'guest', 'guest');
+            $this->connection = new AMQPConnection($connectionConfig->getValue('host'), $connectionConfig->getValue('port'), $connectionConfig->getValue('user'), $connectionConfig->getValue('password'));
         }
 
         return $this->connection;
@@ -33,7 +36,8 @@ class ConsumerDriver extends AbstractConsumerDriver
 
     protected function runWorker()
     {
-        $this->getChannel()->queue_declare('simple_queue', false, true, false, false); //FIXME Use Configuration
+        $workerConfig = $this->getConfigProvider()->getWorkerConfig($this->getWorkerInstance()->getName());
+        $this->getChannel()->queue_declare($workerConfig->getValue('queueName'), false, true, false, false);
 
         $callback = function (\PhpAmqpLib\Message\AMQPMessage $msg) {
             $this->getLogger()->debug('Running processMessage for: ' . $msg->delivery_info['delivery_tag']);

@@ -4,6 +4,7 @@ namespace Strawberry\Driver\MQ;
 use PhpAmqpLib\Message\AMQPMessage;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
+use Strawberry\Driver\Config\AbstractConfigProvider;
 use Strawberry\Exception\NullWorkerException;
 
 /**
@@ -20,6 +21,22 @@ abstract class AbstractConsumerDriver implements LoggerAwareInterface
      * @var LoggerInterface
      */
     private $logger;
+
+    /** @var  AbstractConfigProvider */
+    private $configProvider;
+
+    public function __construct(AbstractConfigProvider $configProvider)
+    {
+        $this->configProvider = $configProvider;
+    }
+
+    /**
+     * @return AbstractConfigProvider
+     */
+    protected function getConfigProvider()
+    {
+        return $this->configProvider;
+    }
 
     /**
      * Sets a logger instance on the object
@@ -56,6 +73,8 @@ abstract class AbstractConsumerDriver implements LoggerAwareInterface
     public function setWorkerInstance(AbstractWorker $worker)
     {
         $this->getLogger()->debug('Setting worker (' . get_class($worker) . ').');
+
+        $worker->setConfig($this->getConfigProvider()->getWorkerConfig($worker->getName()));
 
         $this->workerInstance = $worker;
     }
