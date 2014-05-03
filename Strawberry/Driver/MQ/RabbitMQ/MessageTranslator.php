@@ -20,4 +20,16 @@ class MessageTranslator
 
         return $payload;
     }
+
+    /**
+     * @param Message $message
+     * @return AMQPMessage
+     */
+    public static function messageToMq(Message $message)
+    {
+        $data = serialize($message);
+        $mqMessage = new AMQPMessage($data, array('delivery_mode' => 2));
+
+        return $mqMessage;
+    }
 } 

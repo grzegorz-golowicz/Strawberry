@@ -20,6 +20,7 @@ class ConsumerDriver extends AbstractConsumerDriver
     {
         $connectionConfig = $this->getConfigProvider()->getMQConfig()->getNode('connection');
         if (true === $forceNew || null === $this->connection) {
+            $this->getLogger()->debug('Creating new AMQP connection.');
             $this->connection = new AMQPConnection($connectionConfig->getValue('host'), $connectionConfig->getValue('port'), $connectionConfig->getValue('user'), $connectionConfig->getValue('password'));
         }
 
@@ -29,7 +30,7 @@ class ConsumerDriver extends AbstractConsumerDriver
     /**
      * @return \PhpAmqpLib\Channel\AMQPChannel
      */
-    protected function getChannel()
+    protected function getNewChannel()
     {
         return $this->getConnection()->channel();
     }
@@ -37,34 +38,47 @@ class ConsumerDriver extends AbstractConsumerDriver
     protected function runWorker()
     {
         $workerConfig = $this->getConfigProvider()->getWorkerConfig($this->getWorkerInstance()->getName());
-        $this->getChannel()->queue_declare($workerConfig->getValue('queueName'), false, true, false, false);
+        $channel = $this->getNewChannel();
+        $channel->queue_declare($workerConfig->getValue('queueName'), false, true, false, false);
 
         $callback = function (\PhpAmqpLib\Message\AMQPMessage $msg) {
             $this->getLogger()->debug('Running processMessage for: ' . $msg->delivery_info['delivery_tag']);
-            $this->getWorkerInstance()->processMessage($this->translateMessage($msg));
 
-            if ($this->getWorkerInstance()->isLastJobSuccessful()) {
-                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
-                $this->getLogger()->debug('Sending ACK for message: ' . $msg->delivery_info['delivery_tag']);
-            } else {
-                $msg->delivery_info['channel']->basic_cancel($msg->delivery_info['delivery_tag']);
-                $this->getLogger()->warning('Canceling message: ' . $msg->delivery_info['delivery_tag']);
+            try {
+                $this->getWorkerInstance()->processMessage($this->translateMessage($msg));
+
+                if ($this->getWorkerInstance()->isLastJobSuccessful()) {
+                    $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+                    $this->getLogger()->debug('Sending ACK for message: ' . $msg->delivery_info['delivery_tag']);
+                } else {
+                    $msg->delivery_info['channel']->basic_cancel($msg->delivery_info['delivery_tag']);
+                    $this->getLogger()->warning('Canceling message: ' . $msg->delivery_info['delivery_tag']);
+                }
+            } catch (\Exception $ex) {
+                $this->getLogger()->critical($ex->getMessage());
             }
+
+
+
         };
 
-        $this->getChannel()->basic_qos(null, 1, null);
-        $this->getChannel()->basic_consume('simple_queue', '', false, false, false, false, $callback);
+        $channel->basic_qos(null, 1, null);
+        $channel->basic_consume($workerConfig->getValue('queueName'), '', false, false, false, false, $callback);
 
-        while (count($this->getChannel()->callbacks)) {
-            $this->getChannel()->wait();
+        $this->getLogger()->debug('Waiting for queue: ' . $workerConfig->getValue('queueName'));
+
+        while (count($channel->callbacks)) {
+            $channel->wait();
         }
 
-        $this->getChannel()->close();
+        $channel->close();
+        $this->getLogger()->debug('Channel closed.');
         $this->getConnection()->close();
+        $this->getLogger()->debug('Connection closed.');
     }
 
     protected function translateMessage(\PhpAmqpLib\Message\AMQPMessage $msg)
     {
-        return MessageTranslator::translator($msg);
+        return MessageTranslator::mqToMessage($msg);
     }
 }

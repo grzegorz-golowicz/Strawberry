@@ -64,5 +64,8 @@ abstract class AbstractWorker implements LoggerAwareInterface
      * Worker name ex.: DownloadWorker
      * @return string
      */
-    public abstract function getName();
+    public function getName()
+    {
+        return get_class($this);
+    }
 } 
