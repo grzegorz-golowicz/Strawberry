@@ -17,8 +17,8 @@ class ProducerDriver extends AbstractProducerDriver
      */
     protected function getConnection($forceNew = false)
     {
-        $connectionConfig = $this->getConfigProvider()->getMQConfig()->getNode('connection');
         if (true === $forceNew || null === $this->connection) {
+            $connectionConfig = $this->getConfigProvider()->getMQConfig()->getNode('connection');
             $this->getLogger()->debug('Creating new AMQP connection.');
             $this->connection = new AMQPConnection($connectionConfig->getValue('host'), $connectionConfig->getValue('port'), $connectionConfig->getValue('user'), $connectionConfig->getValue('password'));
         }

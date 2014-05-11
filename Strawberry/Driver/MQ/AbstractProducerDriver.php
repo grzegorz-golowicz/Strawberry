@@ -22,6 +22,14 @@ abstract class AbstractProducerDriver implements LoggerAwareInterface
     }
 
     /**
+     * @return AbstractConfigProvider
+     */
+    public function getConfigProvider()
+    {
+        return $this->configProvider;
+    }
+
+    /**
      * Sets a logger instance on the object
      *
      * @param LoggerInterface $logger
