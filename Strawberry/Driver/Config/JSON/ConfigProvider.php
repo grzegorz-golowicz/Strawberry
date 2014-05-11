@@ -58,5 +58,17 @@ class ConfigProvider extends AbstractConfigProvider
         }
     }
 
+    /**
+     * @return ConfigEntity
+     * @throws \Strawberry\Exception\ConfigurationNotProvidedException
+     */
+    public function getDataStoreConfig()
+    {
+        if (isset($this->configCache[self::PATH_DATA_STORE]) && is_array($this->configCache[self::PATH_DATA_STORE])) {
+            return new ConfigEntity($this->configCache[self::PATH_DATA_STORE]);
+        } else {
+            throw new ConfigurationNotProvidedException('Configuration for data store not provided!');
+        }
+    }
 
 } 

@@ -14,6 +14,8 @@ abstract class AbstractConfigProvider
 
     const PATH_WORKERS = 'WORKERS';
 
+    const PATH_DATA_STORE = 'DATA_STORE';
+
     private $uri;
 
     private $prefix;
@@ -24,7 +26,10 @@ abstract class AbstractConfigProvider
 
     function __construct($uri, $prefix = null, $username = null, $password = null)
     {
-
+        $this->setUri($uri);
+        $this->setPrefix($prefix);
+        $this->setUsername($username);
+        $this->setPassword($password);
     }
 
     /**
@@ -101,4 +106,9 @@ abstract class AbstractConfigProvider
      * @return ConfigEntity
      */
     abstract public function getWorkerConfig($workerName);
+
+    /**
+     * @return ConfigEntity
+     */
+    abstract public function getDataStoreConfig();
 } 
